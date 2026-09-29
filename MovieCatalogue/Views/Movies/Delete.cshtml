@@ -1,0 +1,28 @@
+﻿@model MovieCatalogue.ViewModels.MovieDeleteViewModel
+
+<h2>Delete Movie</h2>
+
+<h4>Are you sure?</h4>
+
+<div>
+    <p><strong>Id:</strong> @Model.Id</p>
+    <p><strong>Title:</strong> @Model.Title</p>
+    <p><strong>Director:</strong> @Model.Director</p>
+    <p><strong>Genre:</strong> @Model.Genre</p>
+    <p><strong>Rating:</strong> @Model.Rating</p>
+
+</div>
+
+<form asp-action="Delete">
+
+    <input type="hidden" asp-for="Id" />
+
+    <button class="btn btn-danger">
+        Delete
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Cancel
+    </a>
+
+</form>

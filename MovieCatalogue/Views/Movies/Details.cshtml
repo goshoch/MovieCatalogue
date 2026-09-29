@@ -1,0 +1,59 @@
+﻿@model MovieCatalogue.ViewModels.MovieDetailsViewModel
+
+<h2>Movie Details</h2>
+
+<table class="table">
+    <tr>
+        <th>Id</th>
+        <td>@Model.Id</td>
+    </tr>
+
+    <tr>
+        <th>Title</th>
+        <td>@Model.Title</td>
+    </tr>
+
+    <tr>
+        <th>Director</th>
+        <td>@Model.Director</td>
+    </tr>
+
+    <tr>
+        <th>Genre</th>
+        <td>@Model.Genre</td>
+    </tr>
+
+    <tr>
+        <th>Release Year</th>
+        <td>@Model.ReleaseYear</td>
+    </tr>
+
+    <tr>
+        <th>Duration</th>
+        <td>@Model.Duration</td>
+    </tr>
+
+    <tr>
+        <th>Rating</th>
+        <td>@Model.Rating</td>
+    </tr>
+
+    <tr>
+        <th>Language</th>
+        <td>@Model.Language</td>
+    </tr>
+
+    <tr>
+        <th>Description</th>
+        <td>@Model.Description</td>
+    </tr>
+
+</table>
+
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+    Edit
+</a>
+
+<a asp-action="Index" class="btn btn-secondary">
+    Back
+</a>

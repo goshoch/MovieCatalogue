@@ -1,0 +1,59 @@
+﻿@model List<MovieCatalogue.ViewModels.MovieListViewModel>
+
+<h2>Movie Catalogue</h2>
+
+<form asp-action="Index" method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" 
+               name="search" 
+               class="form-control" 
+               placeholder="Search movies..." 
+               value="@ViewBag.Search" />
+        <button class="btn btn-outline-secondary" type="submit">Search</button>
+        @if (!string.IsNullOrEmpty(ViewBag.Search))
+        {
+            <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+        }
+    </div>
+</form>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Add Movie</a>
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Director</th>
+            <th>Genre</th>
+            <th>Release Year</th>
+            <th>Rating</th>
+            <th>Language</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Title</td>
+                <td>@item.Director</td>
+                <td>@item.Genre</td>
+                <td>@item.ReleaseYear</td>
+                <td>@item.Rating</td>
+                <td>@item.Language</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Details</a>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No movies found.</div>
+}

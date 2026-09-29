@@ -1,0 +1,63 @@
+﻿@model MovieCatalogue.ViewModels.MovieEditViewModel
+
+<h2>Edit Movie</h2>
+
+<form asp-action="Edit">
+
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-2">
+        <label asp-for="Title"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-2">
+        <label asp-for="DirectorId"></label>
+        <select asp-for="DirectorId" class="form-control" asp-items="Model.Directors">
+            <option value="">-- Select Director --</option>
+        </select>
+        <span asp-validation-for="DirectorId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-2">
+        <label asp-for="Genre"></label>
+        <input asp-for="Genre" class="form-control" />
+        <span asp-validation-for="Genre"></span>
+    </div>
+
+    <div class="mb-2">
+        <label asp-for="ReleaseYear"></label>
+        <input asp-for="ReleaseYear" class="form-control" />
+        <span asp-validation-for="ReleaseYear"></span>
+    </div>
+
+    <div class="mb-2">
+        <label asp-for="Duration"></label>
+        <input asp-for="Duration" class="form-control" />
+        <span asp-validation-for="Duration"></span>
+    </div>
+
+    <div class="mb-2">
+        <label asp-for="Rating"></label>
+        <input asp-for="Rating" class="form-control" />
+        <span asp-validation-for="Rating"></span>
+    </div>
+
+    <div class="mb-2">
+        <label asp-for="Language"></label>
+        <input asp-for="Language" class="form-control" />
+        <span asp-validation-for="Language"></span>
+    </div>
+
+    <div class="mb-2">
+        <label asp-for="Description"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description"></span>
+    </div>
+
+    <button class="btn btn-primary">Save Changes</button>
+</form>
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+    }

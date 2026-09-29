@@ -1,0 +1,44 @@
+@model MovieCatalogue.ViewModels.DirectorCreateViewModel
+
+<h2>Create Director</h2>
+
+<form asp-action="Create">
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-2">
+        <label asp-for="FirstName"></label>
+        <input asp-for="FirstName" class="form-control" />
+        <span asp-validation-for="FirstName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-2">
+        <label asp-for="LastName"></label>
+        <input asp-for="LastName" class="form-control" />
+        <span asp-validation-for="LastName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-2">
+        <label asp-for="BirthDate"></label>
+        <input asp-for="BirthDate" class="form-control" type="date" />
+        <span asp-validation-for="BirthDate" class="text-danger"></span>
+    </div>
+
+    <div class="mb-2">
+        <label asp-for="Nationality"></label>
+        <input asp-for="Nationality" class="form-control" />
+        <span asp-validation-for="Nationality" class="text-danger"></span>
+    </div>
+
+    <div class="mb-2">
+        <label asp-for="Biography"></label>
+        <textarea asp-for="Biography" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="Biography" class="text-danger"></span>
+    </div>
+
+    <button class="btn btn-success">Save</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

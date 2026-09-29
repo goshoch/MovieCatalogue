@@ -1,0 +1,44 @@
+[
+    {
+        "FirstName": "Martin",
+        "LastName": "Scorsese",
+        "BirthDate": "1942-11-17",
+        "Nationality": "American",
+        "Biography": "Martin Charles Scorsese is an American film director, producer, screenwriter, and actor. He is widely regarded as one of the most significant and influential filmmakers in cinematic history."
+    },
+    {
+        "FirstName": "Jean-Marc",
+        "LastName": "Vallée",
+        "BirthDate": "1963-03-09",
+        "Nationality": "Canadian",
+        "Biography": "Jean-Marc Vallée was a Canadian film director and film editor. He received critical acclaim for his work on films like Dallas Buyers Club and Wild."
+    },
+    {
+        "FirstName": "Denis",
+        "LastName": "Villeneuve",
+        "BirthDate": "1967-10-03",
+        "Nationality": "Canadian",
+        "Biography": "Denis Villeneuve is a Canadian film director and writer. He is known for directing critically acclaimed films such as Arrival, Blade Runner 2049, and Dune."
+    },
+    {
+        "FirstName": "Francis Ford",
+        "LastName": "Coppola",
+        "BirthDate": "1939-04-07",
+        "Nationality": "American",
+        "Biography": "Francis Ford Coppola is an American film director, producer, and screenwriter. He is best known for directing The Godfather trilogy."
+    },
+    {
+        "FirstName": "Christopher",
+        "LastName": "Nolan",
+        "BirthDate": "1970-07-30",
+        "Nationality": "British-American",
+        "Biography": "Christopher Edward Nolan is a British-American film director, producer, and screenwriter. He is known for his complex storytelling and practical effects."
+    },
+    {
+        "FirstName": "Frank",
+        "LastName": "Darabont",
+        "BirthDate": "1959-01-28",
+        "Nationality": "Hungarian-American",
+        "Biography": "Frank Árpád Darabont is a Hungarian-American film director, producer, and screenwriter. He is known for directing The Shawshank Redemption and The Green Mile."
+    }
+]

@@ -1,0 +1,53 @@
+@model MovieCatalogue.ViewModels.DirectorDeleteViewModel
+
+<h2>Delete Director</h2>
+
+<h4>Are you sure?</h4>
+
+@if (ViewData["Error"] != null)
+{
+    <div class="alert alert-danger">@ViewData["Error"]</div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<div>
+    <p><strong>Id:</strong> @Model.Id</p>
+    <p><strong>First Name:</strong> @Model.FirstName</p>
+    <p><strong>Last Name:</strong> @Model.LastName</p>
+    <p><strong>Full Name:</strong> @Model.FullName</p>
+    <p><strong>Nationality:</strong> @Model.Nationality</p>
+    <p><strong>Birth Date:</strong> @Model.BirthDate.ToShortDateString()</p>
+    <p><strong>Movies Count:</strong> @Model.MoviesCount</p>
+</div>
+
+@if (Model.MoviesCount > 0)
+{
+    <div class="alert alert-warning">
+        This director has @Model.MoviesCount movie(s). You must delete or reassign them first.
+    </div>
+}
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    @if (Model.MoviesCount > 0)
+
+    {
+        <button type="button" class="btn btn-danger" disabled>
+            Delete
+        </button>
+    }
+
+    else
+
+    {
+        <button type="submit" class="btn btn-danger">
+            Delete
+        </button>
+    }
+
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

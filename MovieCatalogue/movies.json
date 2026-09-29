@@ -1,0 +1,82 @@
+[
+    {
+        "Title": "Taxi Driver",
+        "DirectorId": 1,
+        "Genre": "Crime",
+        "ReleaseYear": 1976,
+        "Duration": 114,
+        "Rating": 8.2,
+        "Language": "English",
+        "Description": "A lonely taxi driver in New York City becomes increasingly disturbed by the crime and decay around him."
+    },
+    {
+        "Title": "Demolition",
+        "DirectorId": 2,
+        "Genre": "Drama",
+        "ReleaseYear": 2015,
+        "Duration": 101,
+        "Rating": 7.0,
+        "Language": "English",
+        "Description": "A successful investment banker begins rebuilding his life after a personal tragedy."
+    },
+    {
+        "Title": "Prisoners",
+        "DirectorId": 3,
+        "Genre": "Thriller",
+        "ReleaseYear": 2013,
+        "Duration": 153,
+        "Rating": 8.1,
+        "Language": "English",
+        "Description": "A desperate father searches for his missing daughter after the police investigation stalls."
+    },
+    {
+        "Title": "The Godfather",
+        "DirectorId": 4,
+        "Genre": "Crime",
+        "ReleaseYear": 1972,
+        "Duration": 175,
+        "Rating": 9.2,
+        "Language": "English",
+        "Description": "The aging patriarch of an organized crime dynasty transfers control of his empire to his reluctant son."
+    },
+    {
+        "Title": "Interstellar",
+        "DirectorId": 5,
+        "Genre": "Sci-Fi",
+        "ReleaseYear": 2014,
+        "Duration": 169,
+        "Rating": 8.7,
+        "Language": "English",
+        "Description": "A group of explorers travel through a wormhole in space to find a new home for humanity."
+    },
+    {
+        "Title": "Inception",
+        "DirectorId": 5,
+        "Genre": "Sci-Fi",
+        "ReleaseYear": 2010,
+        "Duration": 148,
+        "Rating": 8.8,
+        "Language": "English",
+        "Description": "A skilled thief who steals secrets through dreams is given a chance to erase his past by performing an impossible task."
+    },
+    {
+        "Title": "The Dark Knight",
+        "DirectorId": 5,
+        "Genre": "Action",
+        "ReleaseYear": 2008,
+        "Duration": 152,
+        "Rating": 9.0,
+        "Language": "English",
+        "Description": "Batman faces a criminal mastermind who plunges Gotham City into chaos."
+    },
+    {
+        "Title": "The Shawshank Redemption",
+        "DirectorId": 6,
+        "Genre": "Drama",
+        "ReleaseYear": 1994,
+        "Duration": 142,
+        "Rating": 9.3,
+        "Language": "English",
+        "Description": "Two imprisoned men form a friendship over many years and find hope inside a harsh prison system."
+    }
+]
