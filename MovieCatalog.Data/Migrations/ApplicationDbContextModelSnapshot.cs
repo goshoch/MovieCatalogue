@@ -31,6 +31,7 @@ namespace MovieCatalog.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Biography")
+                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
@@ -65,6 +66,7 @@ namespace MovieCatalog.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
@@ -101,6 +103,47 @@ namespace MovieCatalog.Data.Migrations
                     b.ToTable("Movies");
                 });
 
+            modelBuilder.Entity("MovieCatalog.Data.Entities.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("MovieCatalog.Data.Entities.UserReview", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MovieId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Rating")
+                        .HasColumnType("float");
+
+                    b.HasKey("UserId", "MovieId");
+
+                    b.HasIndex("MovieId");
+
+                    b.ToTable("UserReviews");
+                });
+
             modelBuilder.Entity("MovieCatalog.Data.Entities.Movie", b =>
                 {
                     b.HasOne("MovieCatalog.Data.Entities.Director", "Director")
@@ -112,9 +155,38 @@ namespace MovieCatalog.Data.Migrations
                     b.Navigation("Director");
                 });
 
+            modelBuilder.Entity("MovieCatalog.Data.Entities.UserReview", b =>
+                {
+                    b.HasOne("MovieCatalog.Data.Entities.Movie", "Movie")
+                        .WithMany("UserReviews")
+                        .HasForeignKey("MovieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MovieCatalog.Data.Entities.User", "User")
+                        .WithMany("UserReviews")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Movie");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MovieCatalog.Data.Entities.Director", b =>
                 {
                     b.Navigation("Movies");
+                });
+
+            modelBuilder.Entity("MovieCatalog.Data.Entities.Movie", b =>
+                {
+                    b.Navigation("UserReviews");
+                });
+
+            modelBuilder.Entity("MovieCatalog.Data.Entities.User", b =>
+                {
+                    b.Navigation("UserReviews");
                 });
 #pragma warning restore 612, 618
         }

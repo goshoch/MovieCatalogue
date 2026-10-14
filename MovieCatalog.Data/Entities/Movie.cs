@@ -44,5 +44,7 @@ namespace MovieCatalog.Data.Entities
 
         [StringLength(500)]
         public string Description { get; set; }
+        public ICollection<UserReview> UserReviews { get; set; }
+
     }
 }

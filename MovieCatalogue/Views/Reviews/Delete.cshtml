@@ -1,0 +1,31 @@
+
+@model MovieCatalog.Data.Entities.UserReview
+
+<h2>Delete Review</h2>
+
+<p>
+    Are you sure you want to delete your rating for
+    <strong>@Model.Movie.Title</strong>?
+</p>
+
+<p>Your rating: @Model.Rating/10</p>
+
+<form asp-action="Delete" method="post">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" name="userId"
+           value="@Model.UserId" />
+    <input type="hidden" name="movieId"
+           value="@Model.MovieId" />
+
+    <button type="submit" class="btn btn-danger">
+        Delete Review
+    </button>
+
+    <a asp-controller="Users"
+       asp-action="Details"
+       asp-route-id="@Model.UserId"
+       class="btn btn-secondary">
+        Cancel
+    </a>
+</form>

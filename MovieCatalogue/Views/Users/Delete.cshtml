@@ -1,0 +1,49 @@
+@model MovieCatalogue.ViewModels.UserDeleteViewModel
+
+<h2>Delete User</h2>
+
+<h4>Are you sure?</h4>
+
+@if (ViewData["Error"] != null)
+{
+    <div class="alert alert-danger">@ViewData["Error"]</div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<div>
+    <p><strong>Id:</strong> @Model.Id</p>
+    <p><strong>First Name:</strong> @Model.FirstName</p>
+    <p><strong>Last Name:</strong> @Model.LastName</p>
+</div>
+
+@if (Model.ReviewsCount > 0)
+{
+    <div class="alert alert-warning">
+        This user has reviewed @Model.ReviewsCount movie(s). You must delete or reassign them first.
+    </div>
+}
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    @if (Model.ReviewsCount > 0)
+
+    {
+        <button type="button" class="btn btn-danger" disabled>
+            Delete
+        </button>
+    }
+
+    else
+
+    {
+        <button type="submit" class="btn btn-danger">
+            Delete
+        </button>
+    }
+
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

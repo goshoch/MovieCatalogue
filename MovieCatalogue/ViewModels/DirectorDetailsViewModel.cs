@@ -12,9 +12,6 @@ namespace MovieCatalogue.ViewModels
         [Display(Name = "Last Name")]
         public string LastName { get; set; }
 
-        [Display(Name = "Full Name")]
-        public string FullName => $"{FirstName} {LastName}";
-
         [Display(Name = "Birth Date")]
         public DateTime BirthDate { get; set; }
 

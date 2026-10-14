@@ -46,6 +46,28 @@ using (var scope = app.Services.CreateScope())
             context.SaveChanges();
         }
     }
+    if (!context.Users.Any())
+    {
+        var usersJson = File.ReadAllText("users.json");
+        var users = JsonSerializer.Deserialize<List<User>>(usersJson);
+
+        if (users != null)
+        {
+            context.Users.AddRange(users);
+            context.SaveChanges();
+        }
+    }
+    if (!context.UserReviews.Any())
+    {
+        var reviewsJson = File.ReadAllText("reviews.json");
+        var reviews = JsonSerializer.Deserialize<List<UserReview>>(reviewsJson);
+
+        if (reviews != null)
+        {
+            context.UserReviews.AddRange(reviews);
+            context.SaveChanges();
+        }
+    }
 }
 
 // Configure the HTTP request pipeline.
