@@ -1,42 +1,30 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MovieCatalog.Data.Entities;
-using MovieCatalog.Data;
+using MovieCatalogue.Core.Interfaces;
 using MovieCatalogue.ViewModels;
-using Microsoft.EntityFrameworkCore;
 
 namespace MovieCatalogue.Controllers
 {
     public class UsersController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IUserService _userService;
 
-        public UsersController(ApplicationDbContext context)
+        public UsersController(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
 
         public async Task<IActionResult> Index(string search)
         {
-            var users = _context.Users.AsQueryable();
+            var users = await _userService.GetAllAsync(search);
 
-            if (!string.IsNullOrWhiteSpace(search))
+            var userList = users.Select(u => new UserListViewModel
             {
-                users = users.Where(u =>
-                    u.FirstName.Contains(search) ||
-                    u.LastName.Contains(search));
-            }
-
-            var userList = await users
-                .OrderBy(u => u.LastName)
-                .ThenBy(u => u.FirstName)
-                .Select(u => new UserListViewModel
-                {
-                    Id = u.Id,
-                    FirstName = u.FirstName,
-                    LastName = u.LastName,
-                    ReviewsCount = u.UserReviews.Count
-                })
-                .ToListAsync();
+                Id = u.Id,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                ReviewsCount = u.UserReviews?.Count ?? 0
+            }).ToList();
 
             ViewBag.Search = search;
 
@@ -48,32 +36,29 @@ namespace MovieCatalogue.Controllers
             if (id == null)
                 return NotFound();
 
-            var user = await _context.Users
-                .Where(u => u.Id == id)
-                .Select(u => new UserDetailsViewModel
-                {
-                    Id = u.Id,
-                    FirstName = u.FirstName,
-                    LastName = u.LastName,
-
-                    Reviews = u.UserReviews.Select(r => new UserReview
-                    {
-                        UserId = r.UserId,
-                        MovieId = r.MovieId,
-                        Rating = r.Rating,
-                        Movie = r.Movie
-                    }).ToList(),
-
-                    AllMovies = _context.Movies
-                        .OrderBy(m => m.Title)
-                        .ToList()
-                })
-                .FirstOrDefaultAsync();
+            var user = await _userService.GetByIdAsync(id.Value);
 
             if (user == null)
                 return NotFound();
 
-            return View(user);
+            var allMovies = await _userService.GetAllMoviesAsync();
+
+            var model = new UserDetailsViewModel
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Reviews = user.UserReviews?.Select(r => new UserReview
+                {
+                    UserId = r.UserId,
+                    MovieId = r.MovieId,
+                    Rating = r.Rating,
+                    Movie = r.Movie
+                }).ToList() ?? new List<UserReview>(),
+                AllMovies = allMovies
+            };
+
+            return View(model);
         }
 
         public IActionResult Create()
@@ -94,9 +79,7 @@ namespace MovieCatalogue.Controllers
                 LastName = model.LastName
             };
 
-            _context.Users.Add(user);
-
-            await _context.SaveChangesAsync();
+            await _userService.CreateAsync(user);
 
             return RedirectToAction(nameof(Index));
         }
@@ -106,7 +89,7 @@ namespace MovieCatalogue.Controllers
             if (id == null)
                 return NotFound();
 
-            var user = await _context.Users.FindAsync(id);
+            var user = await _userService.GetByIdAsync(id.Value);
 
             if (user == null)
                 return NotFound();
@@ -132,7 +115,7 @@ namespace MovieCatalogue.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var user = await _context.Users.FindAsync(id);
+            var user = await _userService.GetByIdAsync(id);
 
             if (user == null)
                 return NotFound();
@@ -140,7 +123,7 @@ namespace MovieCatalogue.Controllers
             user.FirstName = model.FirstName;
             user.LastName = model.LastName;
 
-            await _context.SaveChangesAsync();
+            await _userService.UpdateAsync(user);
 
             return RedirectToAction(nameof(Index));
         }
@@ -150,35 +133,29 @@ namespace MovieCatalogue.Controllers
             if (id == null)
                 return NotFound();
 
-            var user = await _context.Users
-                .Where(u => u.Id == id)
-                .Select(u => new UserDeleteViewModel
-                {
-                    Id = u.Id,
-                    FirstName = u.FirstName,
-                    LastName = u.LastName,
-                    ReviewsCount = u.UserReviews.Count
-                })
-                .FirstOrDefaultAsync();
+            var user = await _userService.GetByIdAsync(id.Value);
 
             if (user == null)
                 return NotFound();
 
-            return View(user);
+            var model = new UserDeleteViewModel
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                ReviewsCount = user.UserReviews?.Count ?? 0
+            };
+
+            return View(model);
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var user = await _context.Users
-                .Include(u => u.UserReviews)
-                .FirstOrDefaultAsync(u => u.Id == id);
+            var canDelete = await _userService.DeleteAsync(id);
 
-            if (user == null)
-                return NotFound();
-
-            if (user.UserReviews.Any())
+            if (!canDelete)
             {
                 TempData["Error"] =
                     "Cannot delete a user with existing reviews. " +
@@ -187,12 +164,7 @@ namespace MovieCatalogue.Controllers
                 return RedirectToAction(nameof(Delete), new { id });
             }
 
-            _context.Users.Remove(user);
-
-            await _context.SaveChangesAsync();
-
             return RedirectToAction(nameof(Index));
         }
     }
 }
-

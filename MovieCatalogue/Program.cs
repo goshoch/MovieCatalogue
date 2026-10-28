@@ -1,6 +1,8 @@
-using Microsoft.EntityFrameworkCore;
 using MovieCatalog.Data;
 using MovieCatalog.Data.Entities;
+using MovieCatalogue.Core.Interfaces;
+using MovieCatalogue.Core.Services;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +13,12 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register business services as Scoped
+builder.Services.AddScoped<IMovieService, MovieService>();
+builder.Services.AddScoped<IDirectorService, DirectorService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserReviewService, UserReviewService>();
 
 var app = builder.Build();
 

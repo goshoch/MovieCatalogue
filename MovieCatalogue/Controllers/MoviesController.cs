@@ -1,46 +1,34 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using MovieCatalog.Data.Entities;
-using MovieCatalog.Data;
-using Microsoft.EntityFrameworkCore;
+using MovieCatalogue.Core.Interfaces;
 using MovieCatalogue.ViewModels;
 
 namespace MovieCatalogue.Controllers
 {
     public class MoviesController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IMovieService _movieService;
 
-        public MoviesController(ApplicationDbContext context)
+        public MoviesController(IMovieService movieService)
         {
-            _context = context;
+            _movieService = movieService;
         }
 
         public async Task<IActionResult> Index(string search)
         {
-            var movies = _context.Movies.Include(m => m.Director).AsQueryable();
-            
-            if (!string.IsNullOrEmpty(search))
-            {
-                movies = movies.Where(m => m.Title.Contains(search) 
-                    || m.Director.FirstName.Contains(search) 
-                    || m.Director.LastName.Contains(search)
-                    || m.Genre.Contains(search));
-            }
+            var movies = await _movieService.GetAllAsync(search);
 
-            var movieList = await movies
-                .OrderBy(m => m.Title)
-                .Select(m => new MovieListViewModel
-                {
-                    Id = m.Id,
-                    Title = m.Title,
-                    Director = $"{m.Director.FirstName} {m.Director.LastName}",
-                    Genre = m.Genre,
-                    ReleaseYear = m.ReleaseYear,
-                    Rating = m.Rating,
-                    Language = m.Language
-                })
-                .ToListAsync();
+            var movieList = movies.Select(m => new MovieListViewModel
+            {
+                Id = m.Id,
+                Title = m.Title,
+                Director = $"{m.Director?.FirstName ?? string.Empty} {m.Director?.LastName ?? string.Empty}".Trim(),
+                Genre = m.Genre,
+                ReleaseYear = m.ReleaseYear,
+                Rating = m.Rating,
+                Language = m.Language
+            }).ToList();
 
             ViewBag.Search = search;
             return View(movieList);
@@ -51,40 +39,32 @@ namespace MovieCatalogue.Controllers
             if (id == null)
                 return NotFound();
 
-            var movie = await _context.Movies
-                .Include(m => m.Director)
-                .Where(m => m.Id == id)
-                .Select(m => new MovieDetailsViewModel
-                {
-                    Id = m.Id,
-                    Title = m.Title,
-                    Director = $"{m.Director.FirstName} {m.Director.LastName}",
-                    Genre = m.Genre,
-                    ReleaseYear = m.ReleaseYear,
-                    Duration = m.Duration,
-                    Rating = m.Rating,
-                    Language = m.Language,
-                    Description = m.Description
-                })
-                .FirstOrDefaultAsync();
+            var movie = await _movieService.GetDetailsAsync(id.Value);
 
             if (movie == null)
                 return NotFound();
 
-            return View(movie);
+            var model = new MovieDetailsViewModel
+            {
+                Id = movie.Id,
+                Title = movie.Title,
+                Director = $"{movie.Director?.FirstName ?? string.Empty} {movie.Director?.LastName ?? string.Empty}".Trim(),
+                Genre = movie.Genre,
+                ReleaseYear = movie.ReleaseYear,
+                Duration = movie.Duration,
+                Rating = movie.Rating,
+                Language = movie.Language,
+                Description = movie.Description
+            };
+
+            return View(model);
         }
 
         public async Task<IActionResult> Create()
         {
             var model = new MovieCreateViewModel
             {
-                Directors = await _context.Directors
-                    .Select(d => new SelectListItem
-                    {
-                        Value = d.Id.ToString(),
-                        Text = $"{d.FirstName} {d.LastName}"
-                    })
-                    .ToListAsync()
+                Directors = await GetDirectorsSelectList()
             };
             return View(model);
         }
@@ -94,13 +74,7 @@ namespace MovieCatalogue.Controllers
         {
             if (!ModelState.IsValid)
             {
-                model.Directors = await _context.Directors
-                    .Select(d => new SelectListItem
-                    {
-                        Value = d.Id.ToString(),
-                        Text = $"{d.FirstName} {d.LastName}"
-                    })
-                    .ToListAsync();
+                model.Directors = await GetDirectorsSelectList();
                 return View(model);
             }
 
@@ -115,8 +89,8 @@ namespace MovieCatalogue.Controllers
                 Language = model.Language,
                 Description = model.Description
             };
-            _context.Add(movie);
-            await _context.SaveChangesAsync();
+
+            await _movieService.CreateAsync(movie);
 
             return RedirectToAction(nameof(Index));
         }
@@ -126,7 +100,7 @@ namespace MovieCatalogue.Controllers
             if (id == null)
                 return NotFound();
 
-            var movie = await _context.Movies.FindAsync(id);
+            var movie = await _movieService.GetByIdAsync(id.Value);
 
             if (movie == null)
                 return NotFound();
@@ -142,13 +116,7 @@ namespace MovieCatalogue.Controllers
                 Rating = movie.Rating,
                 Language = movie.Language,
                 Description = movie.Description,
-                Directors = await _context.Directors
-                    .Select(d => new SelectListItem
-                    {
-                        Value = d.Id.ToString(),
-                        Text = $"{d.FirstName} {d.LastName}"
-                    })
-                    .ToListAsync()
+                Directors = await GetDirectorsSelectList()
             };
 
             return View(model);
@@ -162,17 +130,11 @@ namespace MovieCatalogue.Controllers
 
             if (!ModelState.IsValid)
             {
-                model.Directors = await _context.Directors
-                    .Select(d => new SelectListItem
-                    {
-                        Value = d.Id.ToString(),
-                        Text = $"{d.FirstName} {d.LastName}"
-                    })
-                    .ToListAsync();
+                model.Directors = await GetDirectorsSelectList();
                 return View(model);
             }
 
-            var movie = await _context.Movies.FindAsync(id);
+            var movie = await _movieService.GetByIdAsync(id);
 
             if (movie == null)
                 return NotFound();
@@ -186,7 +148,7 @@ namespace MovieCatalogue.Controllers
             movie.Language = model.Language;
             movie.Description = model.Description;
 
-            await _context.SaveChangesAsync();
+            await _movieService.UpdateAsync(movie);
 
             return RedirectToAction(nameof(Index));
         }
@@ -196,37 +158,39 @@ namespace MovieCatalogue.Controllers
             if (id == null)
                 return NotFound();
 
-            var movie = await _context.Movies
-                .Include(m => m.Director)
-                .Where(m => m.Id == id)
-                .Select(m => new MovieDeleteViewModel
-                {
-                    Id = m.Id,
-                    Title = m.Title,
-                    Director = $"{m.Director.FirstName} {m.Director.LastName}",
-                    Genre = m.Genre,
-                    Rating = m.Rating,
-                })
-                .FirstOrDefaultAsync();
+            var movie = await _movieService.GetByIdAsync(id.Value);
 
             if (movie == null)
                 return NotFound();
 
-            return View(movie);
+            var model = new MovieDeleteViewModel
+            {
+                Id = movie.Id,
+                Title = movie.Title,
+                Director = $"{movie.Director?.FirstName ?? string.Empty} {movie.Director?.LastName ?? string.Empty}".Trim(),
+                Genre = movie.Genre,
+                Rating = movie.Rating,
+            };
+
+            return View(model);
         }
 
         [HttpPost, ActionName("Delete")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var movie = await _context.Movies.FindAsync(id);
-
-            if (movie != null)
-            {
-                _context.Movies.Remove(movie);
-                await _context.SaveChangesAsync();
-            }
+            await _movieService.DeleteAsync(id);
 
             return RedirectToAction(nameof(Index));
+        }
+
+        private async Task<IEnumerable<SelectListItem>> GetDirectorsSelectList()
+        {
+            var directors = await _movieService.GetDirectorsAsync();
+            return directors.Select(d => new SelectListItem
+            {
+                Value = d.Id.ToString(),
+                Text = $"{d.FirstName} {d.LastName}"
+            });
         }
     }
 }

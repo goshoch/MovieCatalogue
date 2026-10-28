@@ -1,41 +1,32 @@
 using Microsoft.AspNetCore.Mvc;
 using MovieCatalog.Data.Entities;
-using MovieCatalog.Data;
-using Microsoft.EntityFrameworkCore;
+using MovieCatalogue.Core.Interfaces;
 using MovieCatalogue.ViewModels;
 
 namespace MovieCatalogue.Controllers
 {
     public class DirectorsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IDirectorService _directorService;
 
-        public DirectorsController(ApplicationDbContext context)
+        public DirectorsController(IDirectorService directorService)
         {
-            _context = context;
+            _directorService = directorService;
         }
 
         public async Task<IActionResult> Index(string search)
         {
-            var directors = _context.Directors.AsQueryable();
+            var directors = await _directorService.GetAllAsync(search);
 
-            if (!string.IsNullOrEmpty(search))
+            var directorList = directors.Select(d => new DirectorListViewModel
             {
-                directors = directors.Where(d => d.FirstName.Contains(search) || d.LastName.Contains(search) || d.Nationality.Contains(search));
-            }
-
-            var directorList = await directors
-                .OrderBy(d => d.LastName).ThenBy(d => d.FirstName)
-                .Select(d => new DirectorListViewModel
-                {
-                    Id = d.Id,
-                    FirstName = d.FirstName,
-                    LastName = d.LastName,
-                    Nationality = d.Nationality,
-                    BirthDate = d.BirthDate,
-                    MoviesCount = d.Movies.Count
-                })
-                .ToListAsync();
+                Id = d.Id,
+                FirstName = d.FirstName,
+                LastName = d.LastName,
+                Nationality = d.Nationality,
+                BirthDate = d.BirthDate,
+                MoviesCount = d.Movies?.Count ?? 0
+            }).ToList();
 
             ViewBag.Search = search;
             return View(directorList);
@@ -46,35 +37,33 @@ namespace MovieCatalogue.Controllers
             if (id == null)
                 return NotFound();
 
-            var director = await _context.Directors
-                .Include(d => d.Movies)
-                .Where(d => d.Id == id)
-                .Select(d => new DirectorDetailsViewModel
-                {
-                    Id = d.Id,
-                    FirstName = d.FirstName,
-                    LastName = d.LastName,
-                    BirthDate = d.BirthDate,
-                    Nationality = d.Nationality,
-                    Biography = d.Biography,
-                    Movies = d.Movies.Select(m => new MovieListViewModel
-                    {
-                        Id = m.Id,
-                        Title = m.Title,
-                        Director = $"{d.FirstName} {d.LastName}",
-                        Genre = m.Genre,
-                        ReleaseYear = m.ReleaseYear,
-                        Duration = m.Duration,
-                        Rating = m.Rating,
-                        Language = m.Language
-                    }).ToList()
-                })
-                .FirstOrDefaultAsync();
+            var director = await _directorService.GetDetailsAsync(id.Value);
 
             if (director == null)
                 return NotFound();
 
-            return View(director);
+            var model = new DirectorDetailsViewModel
+            {
+                Id = director.Id,
+                FirstName = director.FirstName,
+                LastName = director.LastName,
+                BirthDate = director.BirthDate,
+                Nationality = director.Nationality,
+                Biography = director.Biography,
+                Movies = director.Movies?.Select(m => new MovieListViewModel
+                {
+                    Id = m.Id,
+                    Title = m.Title,
+                    Director = $"{m.Director?.FirstName ?? string.Empty} {m.Director?.LastName ?? string.Empty}".Trim(),
+                    Genre = m.Genre,
+                    ReleaseYear = m.ReleaseYear,
+                    Duration = m.Duration,
+                    Rating = m.Rating,
+                    Language = m.Language
+                }).ToList() ?? new List<MovieListViewModel>()
+            };
+
+            return View(model);
         }
 
         public IActionResult Create()
@@ -99,8 +88,7 @@ namespace MovieCatalogue.Controllers
                 Biography = model.Biography
             };
 
-            _context.Add(director);
-            await _context.SaveChangesAsync();
+            await _directorService.CreateAsync(director);
 
             return RedirectToAction(nameof(Index));
         }
@@ -110,7 +98,7 @@ namespace MovieCatalogue.Controllers
             if (id == null)
                 return NotFound();
 
-            var director = await _context.Directors.FindAsync(id);
+            var director = await _directorService.GetByIdAsync(id.Value);
 
             if (director == null)
                 return NotFound();
@@ -135,9 +123,11 @@ namespace MovieCatalogue.Controllers
                 return NotFound();
 
             if (!ModelState.IsValid)
+            {
                 return View(model);
+            }
 
-            var director = await _context.Directors.FindAsync(id);
+            var director = await _directorService.GetByIdAsync(id);
 
             if (director == null)
                 return NotFound();
@@ -148,7 +138,7 @@ namespace MovieCatalogue.Controllers
             director.Nationality = model.Nationality;
             director.Biography = model.Biography;
 
-            await _context.SaveChangesAsync();
+            await _directorService.UpdateAsync(director);
 
             return RedirectToAction(nameof(Index));
         }
@@ -158,48 +148,36 @@ namespace MovieCatalogue.Controllers
             if (id == null)
                 return NotFound();
 
-            var director = await _context.Directors
-                .Where(d => d.Id == id)
-                .Select(d => new DirectorDeleteViewModel
-                {
-                    Id = d.Id,
-                    FirstName = d.FirstName,
-                    LastName = d.LastName,
-                    Nationality = d.Nationality,
-                    BirthDate = d.BirthDate,
-                    MoviesCount = d.Movies.Count
-                })
-                .FirstOrDefaultAsync();
+            var director = await _directorService.GetByIdAsync(id.Value);
 
             if (director == null)
                 return NotFound();
 
-            return View(director);
+            var model = new DirectorDeleteViewModel
+            {
+                Id = director.Id,
+                FirstName = director.FirstName,
+                LastName = director.LastName,
+                Nationality = director.Nationality,
+                BirthDate = director.BirthDate,
+                MoviesCount = director.Movies?.Count ?? 0
+            };
+
+            return View(model);
         }
 
         [HttpPost, ActionName("Delete")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var director = await _context.Directors
-                .Include(d => d.Movies)
-                .FirstOrDefaultAsync(d => d.Id == id);
+            var canDelete = await _directorService.DeleteAsync(id);
 
-            if (director == null)
-            {
-                return NotFound();
-            }
-
-            if (director.Movies.Any())
+            if (!canDelete)
             {
                 TempData["Error"] = "Cannot delete director with existing movies. Please delete or reassign movies first.";
                 return RedirectToAction(nameof(Delete), new { id });
             }
 
-            _context.Directors.Remove(director);
-            await _context.SaveChangesAsync();
-
             return RedirectToAction(nameof(Index));
         }
-
     }
 }

@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MovieCatalog.Data\MovieCatalog.Data.csproj" />
+    <ProjectReference Include="..\MovieCatalogue.Core\MovieCatalogue.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
